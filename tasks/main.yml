@@ -15,6 +15,11 @@
   with_items: "{{ wireshark_cli_package }}"
   when: wireshark_gui
 
+- name: create wireshark group
+  group:
+    name: wireshark
+    state: present
+
 - name: add current user to wireshark group
   user:
     name: "{{ wireshark_user }}"
