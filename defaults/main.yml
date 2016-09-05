@@ -1,0 +1,7 @@
+---
+# defaults file for ansible-role-wireshark
+wireshark_user: "{{ lookup('env','USER') }}"
+wireshark_gui: false
+wireshark_cli: true
+wireshark_gui_package: wireshark-common
+wireshark_cli_package: tshark
