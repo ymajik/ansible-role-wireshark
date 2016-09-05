@@ -1,6 +1,9 @@
 wireshark
 =========
 
+[![Build Status](https://travis-ci.org/ymajik/ansible-role-wireshark.svg?branch=testing)](https://travis-ci.org/ymajik/ansible-role-wireshark)
+[![Ansible Galaxy](https://img.shields.io/badge/ansible--galaxy-wireshark-blue.svg?style=flat)](https://galaxy.ansible.com/ymajik/wireshark)
+
 Ansible role to install wireshark on Debian based systems
 
 Requirements
