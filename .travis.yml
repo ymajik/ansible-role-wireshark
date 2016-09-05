@@ -1,9 +1,5 @@
 ---
-language: python
-python: "2.7"
-
 sudo: required
-dist: trusty
 
 #safelist
 branches:
@@ -13,44 +9,61 @@ branches:
   - testing
 
 env:
-  - SITE=test.yml
+  - distribution: centos
+    version: 7
+    init: /usr/lib/systemd/systemd
+    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+  - distribution: fedora
+    version: 23
+    init: /usr/lib/systemd/systemd
+    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+  - distribution: fedora
+    version: 24
+    init: /usr/lib/systemd/systemd
+    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+  - distribution: ubuntu
+    version: 14.04
+    init: /sbin/init
+    run_opts: ""
+  - distribution: ubuntu
+    version: 16.04
+    init: /sbin/init
+    run_opts: ""
+  - distribution: debian
+    version: jessie
+    init: /sbin/init
+    run_opts: ""
+
+services:
+  - docker
 
 before_install:
-  - sudo apt-get update -qq
-
-# Install ansible
-addons:
-  apt:
-    packages:
-    - python-pip
-
-install:
-
-  # Install Ansible.
-  - pip install ansible
-
-  # Check ansible version
-  - ansible --version
-
-  # Create ansible.cfg with correct roles_path
-  - printf '[defaults]\nroles_path=../' >ansible.cfg
+  # - sudo apt-get update
+  # Pull container
+  - 'sudo docker pull ${distribution}:${version}'
+  # Customize container
+  - 'sudo docker build --rm=true --file=tests/Dockerfile.${distribution}-${version} --tag=${distribution}-${version}:ansible tests'
 
 script:
-  # Check the role/playbook's syntax.
-  - "ansible-playbook -i tests/inventory tests/$SITE --syntax-check"
+  - container_id=$(mktemp)
+    # Run container in detached state
+  - 'sudo docker run --detach --volume="${PWD}":/etc/ansible/roles/role_under_test:ro ${run_opts} ${distribution}-${version}:ansible "${init}" > "${container_id}"'
 
-  # Run the role/playbook with ansible-playbook.
-  - "ansible-playbook -i tests/inventory tests/$SITE --connection=local --sudo"
+  # Ansible syntax check.
+  - 'sudo docker exec --tty "$(cat ${container_id})" env TERM=xterm ansible-playbook /etc/ansible/roles/role_under_test/tests/test.yml --syntax-check'
 
-  # Travis CI's environment requires one _extra_ run for true idempotence :-/.
-  - "ansible-playbook -i tests/inventory tests/$SITE --connection=local --sudo"
+  # Test role.
+  - 'sudo docker exec --tty "$(cat ${container_id})" env TERM=xterm ansible-playbook /etc/ansible/roles/role_under_test/tests/test.yml'
 
-  # Run the role/playbook again, checking to make sure it's idempotent.
+  # Test role idempotence.
   - >
-    ansible-playbook -i tests/inventory tests/$SITE --connection=local --sudo
+    sudo docker exec "$(cat ${container_id})" ansible-playbook /etc/ansible/roles/role_under_test/tests/test.yml
     | grep -q 'changed=0.*failed=0'
     && (echo 'Idempotence test: pass' && exit 0)
     || (echo 'Idempotence test: fail' && exit 1)
+
+  # Clean up
+  - 'sudo docker stop "$(cat ${container_id})"'
 
 notifications:
   webhooks: https://galaxy.ansible.com/api/v1/notifications/

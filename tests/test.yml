@@ -1,5 +1,6 @@
 ---
-- hosts: localhost
-  remote_user: root
+- hosts: all
+  #remote_user: root
+
   roles:
-    - ansible-role-wireshark
+    - role_under_test

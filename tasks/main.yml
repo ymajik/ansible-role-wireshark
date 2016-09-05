@@ -2,14 +2,14 @@
 # tasks file for ansible-role-wireshark
 
 - name: install cli package
-  apt:
+  package:
     name: "{{ item }}"
     state: present
   with_items: "{{ wireshark_cli_package }}"
   when: wireshark_cli
 
 - name: install gui package
-  apt:
+  package:
     name: "{{ item }}"
     state: present
   with_items: "{{ wireshark_cli_package }}"
