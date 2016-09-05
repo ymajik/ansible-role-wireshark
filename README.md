@@ -15,7 +15,7 @@ Role Variables
 --------------
 
 ```yaml
-wireshark_user: "{{ lookup('env','USER') }}"
+wireshark_user: "{{ ansible_env.USER }}"
 wireshark_package: wireshark
 ```
 
