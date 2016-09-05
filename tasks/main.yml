@@ -1,6 +1,10 @@
 ---
 # tasks file for ansible-role-wireshark
 
+- name: run apt-get update
+  apt:
+    update_cache: yes
+
 - name: install cli package
   apt:
     name: "{{ item }}"
