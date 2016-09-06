@@ -1,6 +1,20 @@
 ---
 # tasks file for ansible-role-wireshark
 
+# Include variables and define needed variables.
+- name: Include OS-specific variables.
+  include_vars: "{{ ansible_os_family }}.yml"
+
+# # Setup/install tasks.
+# - include: setup-RedHat.yml
+#   when: ansible_distribution == 'CentOS' or ansible_distribution =='RedHat'
+#
+# - include: setup-Fedora.yml
+#   when: ansible_distribution == 'Fedora'
+#
+# - include: setup-Debian.yml
+#   when: ansible_os_family == 'Debian'
+
 - name: install cli package
   package:
     name: "{{ item }}"
@@ -25,11 +39,3 @@
     name: "{{ wireshark_user }}"
     append: yes
     groups: wireshark
-
-when: ansible_distribution == 'CentOS' and ansible_distribution_version == '6.4'
-
-when: ansible_distribution == 'Ubuntu' and ansible_distribution_release == 'precise'
-
-when: ansible_distribution == 'Debian' and ansible_distribution_version == '7'
-
-when: ansible_os_family == "RedHat" and ansible_lsb.major_release|int >= 5
