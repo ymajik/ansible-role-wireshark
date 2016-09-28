@@ -6,6 +6,15 @@
     update_cache: yes
   become: yes
 
+- name: let non root to capture traffic
+  # Before installing any package, this only sets the preference for the question
+  debconf:
+    name='wireshark-common'
+    question='wireshark-common/install-setuid'
+    vtype='boolean'
+    value='true'
+  become: yes
+
 - name: install cli package
   apt:
     name: "{{ item }}"
@@ -20,12 +29,6 @@
     state: present
   with_items: "{{ wireshark_gui_package }}"
   when: wireshark_gui
-  become: yes
-
-- name: create wireshark group
-  group:
-    name: wireshark
-    state: present
   become: yes
 
 - name: add current user to wireshark group
