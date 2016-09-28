@@ -4,6 +4,7 @@
 - name: run apt-get update
   apt:
     update_cache: yes
+  become: yes
 
 - name: install cli package
   apt:
@@ -11,21 +12,25 @@
     state: present
   with_items: "{{ wireshark_cli_package }}"
   when: wireshark_cli
+  become: yes
 
 - name: install gui package
   apt:
     name: "{{ item }}"
     state: present
-  with_items: "{{ wireshark_cli_package }}"
+  with_items: "{{ wireshark_gui_package }}"
   when: wireshark_gui
+  become: yes
 
 - name: create wireshark group
   group:
     name: wireshark
     state: present
+  become: yes
 
 - name: add current user to wireshark group
   user:
     name: "{{ wireshark_user }}"
     append: yes
     groups: wireshark
+  become: yes
